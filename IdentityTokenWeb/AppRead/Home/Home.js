@@ -21,17 +21,23 @@ var _xhr;
     };
 
     function getUserIdentityTokenCallback(asyncResult) {
+        $("#status").val("getUserIdentityTokenCallback in progress");
         var token = asyncResult.value;
+        
+        if (asyncResult.status === "succeeded") {
+            _xhr = new XMLHttpRequest();
+            _xhr.open("POST", "https://dsmsgeu-identitytokenservice.azurewebsites.net/api/IdentityToken/");
+            _xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+            _xhr.onreadystatechange = readyStateChange;
 
-        _xhr = new XMLHttpRequest();
-        _xhr.open("POST", "https://dsmsgeu-identitytokenservice.azurewebsites.net/api/IdentityToken/");
-        _xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-        _xhr.onreadystatechange = readyStateChange;
-
-        var request = new Object();
-        request.token = token;
-        $("#tok").val(JSON.stringify(request));
-        _xhr.send(JSON.stringify(request));
+            var request = new Object();
+            request.token = token;
+            $("#tok").val(JSON.stringify(request));
+            $("#result").val(asyncResult.status);
+            _xhr.send(JSON.stringify(request));
+        }
+        else { $("#result").val("Failed: " + asyncResult.error.errorMessage); }
+        $("#status").val("getUserIdentityTokenCallback in complete");
     }
 
     function readyStateChange() {
@@ -54,6 +60,7 @@ var _xhr;
             }
             else {
                 $("#error").val(response.error);
+
                 app.showNotification("Error!", response.errorMessage);
             }
         }
